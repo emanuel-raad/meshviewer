@@ -30,6 +30,12 @@
     <ClCompile Include="Source - (1).cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Source - (2).cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source - transforms.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Shader.h">
