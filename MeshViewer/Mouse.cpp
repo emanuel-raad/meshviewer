@@ -3,19 +3,20 @@
 
 Mouse::Mouse()
 {
-	leftButton_ = false;
-	rightButton_ = false;
-	middleButton_ = false;
 }
 
 Mouse & Mouse::getInstance()
 {
-	if (instance_ == 0)
-		static Mouse instance_;
+	static Mouse instance_;
 	return instance_;
 }
 
-
-Mouse::~Mouse()
+void Mouse::setButtonState(int button, bool state)
 {
+	buttonState_[button] = state;
+}
+
+bool Mouse::getButtonState(int button)
+{
+	return buttonState_[button];
 }

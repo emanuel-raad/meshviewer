@@ -2,13 +2,17 @@
 class Mouse
 {
 private:
-	static Mouse& instance_;
-	bool leftButton_;
-	bool rightButton_;
-	bool middleButton_;
+	bool buttonState_[3] = { false, false, false };
 
 	Mouse();
-	~Mouse();
+
 public:
+	const static int MIDDLE = 0;
+	const static int LEFT = 1;
+	const static int RIGHT = 2;
+
 	static Mouse& getInstance();
+	void setButtonState(int button, bool state);
+	bool getButtonState(int button);
+
 };

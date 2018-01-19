@@ -7,6 +7,7 @@
 
 #include "Shader.h"
 #include "Camera.h"
+#include "Mouse.h"
 
 #include <iostream>
 #include <cmath>
@@ -31,6 +32,8 @@ Camera camera(
 	glm::vec3(0.0f, 0.0f, -1.0f),
 	glm::vec3(0.0f, 1.0f, 0.0f)
 );
+
+Mouse mouse = Mouse::getInstance();
 
 float lastX = 400;
 float lastY = 300;
@@ -76,7 +79,7 @@ int main() {
     }
 
 	glEnable(GL_DEPTH_TEST);
-	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	//glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 	Shader shaderProgram("vertex.vert", "fragment.frag");
 
@@ -271,16 +274,13 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
 	lastX = xpos;
 	lastY = ypos;
 	
-	/*
-	if (glfwGetKey(window, GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS) {
+	if (mouse.getInstance().getButtonState(Mouse::MIDDLE)) {
 		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 		camera.rotateScreen(xoffset, yoffset);
 	}
-	if (glfwGetKey(window, GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_RELEASE) {
+	if (!mouse.getInstance().getButtonState(Mouse::MIDDLE)) {
 		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-	}
-	*/
-	camera.rotateScreen(xoffset, yoffset);
+	}	
 }
 
 
@@ -292,4 +292,10 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
 
 void mouse_button_callback(GLFWwindow * window, int button, int action, int mods)
 {
+	if (button == GLFW_MOUSE_BUTTON_MIDDLE && action == GLFW_PRESS)
+		mouse.getInstance().setButtonState(Mouse::MIDDLE, true);
+	if (button == GLFW_MOUSE_BUTTON_MIDDLE && action == GLFW_RELEASE)
+		mouse.getInstance().setButtonState(Mouse::MIDDLE, false);
+
+	std::cout << mouse.getInstance().getButtonState(Mouse::MIDDLE) << std::endl;
 }
