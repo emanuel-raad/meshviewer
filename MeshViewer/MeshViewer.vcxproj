@@ -118,7 +118,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Camera.cpp" />
     <ClCompile Include="D:\Inbox\Downloads\glad\src\glad.c" />
+    <ClCompile Include="Mouse.cpp" />
     <ClCompile Include="Source - (1).cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
@@ -131,6 +133,8 @@
     <ClCompile Include="Source.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Camera.h" />
+    <ClInclude Include="Mouse.h" />
     <ClInclude Include="Shader.h" />
   </ItemGroup>
   <ItemGroup>

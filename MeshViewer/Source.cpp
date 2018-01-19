@@ -6,18 +6,31 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include "Shader.h"
+#include "Camera.h"
 
 #include <iostream>
+#include <cmath>
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow *window);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
+void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
+
+// screen size settings
+const unsigned int SCR_WIDTH = 800;
+const unsigned int SCR_HEIGHT = 600;
 
 // Camera Settings
 glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
 glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
 glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+
+Camera camera(
+	glm::vec3(0.0f, 0.0f, 10.0f),
+	glm::vec3(0.0f, 0.0f, -1.0f),
+	glm::vec3(0.0f, 1.0f, 0.0f)
+);
 
 float lastX = 400;
 float lastY = 300;
@@ -30,9 +43,6 @@ float fov = 45.0f;
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
-// screen size settings
-const unsigned int SCR_WIDTH = 800;
-const unsigned int SCR_HEIGHT = 600;
 
 int main() {
     // glfw: initialize and configure
@@ -57,6 +67,7 @@ int main() {
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 	glfwSetCursorPosCallback(window, mouse_callback);
 	glfwSetScrollCallback(window, scroll_callback);
+	glfwSetMouseButtonCallback(window, mouse_button_callback);
 
     // glad boilerplate to load all the needed OpenGL pointers
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
@@ -66,7 +77,6 @@ int main() {
 
 	glEnable(GL_DEPTH_TEST);
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-
 
 	Shader shaderProgram("vertex.vert", "fragment.frag");
 
@@ -168,23 +178,6 @@ int main() {
 	view = glm::rotate(view, glm::radians(90.0f), glm::vec3(0.0f, -1.0f, 0.0f));
 	view = glm::translate(view, glm::vec3(-15.0f, 0.0f, 0.0f));
 
-	/*
-	// 4 vectors needed to specify the camera. Position, direction, right, up
-	// Basically gram-schmidt orthonormalizing
-
-	glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
-	// Camera will look at the origin. "direction" vector points from target to camera
-	glm::vec3 cameraTarget = glm::vec3(0.0f, 0.0f, 0.0f);
-	glm::vec3 cameraDirection = glm::normalize(cameraPos - cameraTarget);
-	// Right
-	glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
-	glm::vec3 cameraRight = glm::normalize(glm::cross(up, cameraDirection));
-	// Up
-	glm::vec3 cameraUp = glm::cross(cameraDirection, cameraRight);
-	*/
-
-	// Shortcut for the above. use glm::lookAt(position, target, up)
-
     // main render loop
     while (!glfwWindowShouldClose(window)) {
 
@@ -202,14 +195,12 @@ int main() {
 
 		shaderProgram.use();
 
-		cameraPos.y = 0.0f;
 		glm::mat4 view;
-		view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+		view = camera.getViewMatrix();
+		shaderProgram.setMat4("view", view);
 
 		glm::mat4 projection;
-		projection = glm::perspective(glm::radians(fov), (float)SCR_WIDTH / SCR_HEIGHT, 0.1f, 100.0f);
-
-		shaderProgram.setMat4("view", view);
+		projection = glm::perspective(glm::radians(camera.getFov()), (float)SCR_WIDTH / SCR_HEIGHT, 0.1f, 100.0f);
 		shaderProgram.setMat4("projection", projection);
 
 		glBindVertexArray(VAO);
@@ -245,7 +236,7 @@ int main() {
 void processInput(GLFWwindow *window) {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
-
+	/*
 	float cameraSpeed = 5.0f * deltaTime;
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 		cameraPos += cameraSpeed * cameraFront;
@@ -255,6 +246,7 @@ void processInput(GLFWwindow *window) {
 		cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
 		cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+	*/
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
@@ -266,46 +258,38 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
 }
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
-
-	if (firstMouse) {
+	if (firstMouse)
+	{
 		lastX = xpos;
 		lastY = ypos;
 		firstMouse = false;
 	}
 
 	float xoffset = xpos - lastX;
-	float yoffset = lastY - ypos;
+	float yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
+
 	lastX = xpos;
 	lastY = ypos;
-
-	float sensitivity = 0.05f;
-	xoffset *= sensitivity;
-	yoffset *= sensitivity;
-
-	yaw += xoffset;
-	pitch += yoffset;
-
-	if (pitch > 89.0f)
-		pitch = 89.0f;
-	if (pitch < -89.0f)
-		pitch = -89.0f;
-
-
-	// Spherical coords to cartesian basically
-	glm::vec3 front;
-	front.x = cos(glm::radians(pitch)) * cos(glm::radians(yaw));
-	front.y = sin(glm::radians(pitch));
-	front.z = cos(glm::radians(pitch)) * sin(glm::radians(yaw));
-	cameraFront = glm::normalize(front);
-
+	
+	/*
+	if (glfwGetKey(window, GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS) {
+		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+		camera.rotateScreen(xoffset, yoffset);
+	}
+	if (glfwGetKey(window, GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_RELEASE) {
+		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+	}
+	*/
+	camera.rotateScreen(xoffset, yoffset);
 }
 
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+
+
+
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
+	camera.scrollScreen(yoffset);
+}
+
+void mouse_button_callback(GLFWwindow * window, int button, int action, int mods)
 {
-	if (fov >= 1.0f && fov <= 45.0f)
-		fov -= yoffset;
-	if (fov <= 1.0f)
-		fov = 1.0f;
-	if (fov >= 45.0f)
-		fov = 45.0f;
 }
