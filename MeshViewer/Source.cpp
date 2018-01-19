@@ -82,6 +82,7 @@ int main() {
 	//glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 	Shader shaderProgram("vertex.vert", "fragment.frag");
+	mouse.getInstance().setLogging(true);
 
 	float vertices[] = {
 		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f, 0.0f,
@@ -180,6 +181,11 @@ int main() {
 	glm::mat4 view;
 	view = glm::rotate(view, glm::radians(90.0f), glm::vec3(0.0f, -1.0f, 0.0f));
 	view = glm::translate(view, glm::vec3(-15.0f, 0.0f, 0.0f));
+
+	std::cout << "middle: " << GLFW_MOUSE_BUTTON_MIDDLE << std::endl;
+	std::cout << "left: " << GLFW_MOUSE_BUTTON_LEFT << std::endl;
+	std::cout << "right: " << GLFW_MOUSE_BUTTON_RIGHT << std::endl;
+
 
     // main render loop
     while (!glfwWindowShouldClose(window)) {
@@ -292,10 +298,13 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
 
 void mouse_button_callback(GLFWwindow * window, int button, int action, int mods)
 {
-	if (button == GLFW_MOUSE_BUTTON_MIDDLE && action == GLFW_PRESS)
-		mouse.getInstance().setButtonState(Mouse::MIDDLE, true);
-	if (button == GLFW_MOUSE_BUTTON_MIDDLE && action == GLFW_RELEASE)
-		mouse.getInstance().setButtonState(Mouse::MIDDLE, false);
+	// GLFW_BUTTON_LEFT = 0
+	// GLFW_BUTTON_RIGHT = 1
+	// GLFW_BUTTON_MIDDLE = 2
 
-	std::cout << mouse.getInstance().getButtonState(Mouse::MIDDLE) << std::endl;
+	if (action == GLFW_PRESS)
+		mouse.getInstance().setButtonState(button, true);
+	if (action == GLFW_RELEASE)
+		mouse.getInstance().setButtonState(button, false);
+
 }
