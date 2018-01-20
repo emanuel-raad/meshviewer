@@ -48,8 +48,21 @@ void Camera::rotateScreen(double xoffset, double yoffset)
 	updateCameraVectors();
 }
 
-void Camera::panScreen(double xpos, double ypos)
+void Camera::panScreen(DIRECTION direction, float deltaTime)
 {
+	float velocity = 2.0f * deltaTime;
+	if (direction == UP)
+		cameraPos_ += cameraUp_ * velocity;
+	if (direction == DOWN)
+		cameraPos_ -= cameraUp_ * velocity;
+	if (direction == FORWARD)
+		cameraPos_ += cameraFront_ * velocity;
+	if (direction == BACKWARD)
+		cameraPos_ -= cameraFront_ * velocity;
+	if (direction == LEFT)
+		cameraPos_ -= cameraRight_ * velocity;
+	if (direction == RIGHT)
+		cameraPos_ += cameraRight_ * velocity;
 }
 
 void Camera::updateCameraVectors()

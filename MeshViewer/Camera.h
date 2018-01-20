@@ -2,19 +2,24 @@
 
 #include <glm/glm.hpp>
 
+enum DIRECTION {
+	UP,
+	DOWN,
+	LEFT,
+	RIGHT,
+	FORWARD,
+	BACKWARD
+};
+
 class Camera
 {
 public:
-	enum Direction {
-		UP, DOWN, LEFT, RIGHT, FORWARD, BACKWARD
-	};
-
 	Camera(glm::vec3 cameraPos, glm::vec3 cameraFront, glm::vec3 cameraUp);
 	~Camera();
 
 	void scrollScreen(double yOffset);
 	void rotateScreen(double xoffset, double yoffset);
-	void panScreen(double xpos, double ypos);
+	void Camera::panScreen(DIRECTION direction, float deltaTime);
 	void updateCameraVectors();
 	float getFov();
 	glm::mat4 getViewMatrix();
